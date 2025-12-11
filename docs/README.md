@@ -33,7 +33,7 @@
 | 6. Modelado | ✅ | XGBoost + LightGBM + Calibración |
 | 7. Backend API | ✅ | FastAPI + APScheduler |
 | 8. Frontend | ✅ | Next.js Dashboard Premium |
-| 9. Testing | ⏳ | En progreso |
+| 9. Testing | ✅ | 29 tests E2E + Unitarios |
 
 ---
 
