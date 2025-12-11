@@ -98,11 +98,16 @@ class CollectRequest(BaseModel):
 
 class FeaturesRequest(BaseModel):
     min_matches: int = 5  # Mínimo de partidos para incluir equipo
+    include_h2h: bool = True
+    include_form: bool = True
+    include_standings: bool = True
 
 
 class TrainRequest(BaseModel):
     test_size: float = 0.2
     calibrate: bool = True
+    use_xgboost: bool = True
+    use_lightgbm: bool = True
 
 
 class StatusResponse(BaseModel):
