@@ -26,9 +26,9 @@
 | Fase | Estado | Descripción |
 |------|--------|-------------|
 | 1. Setup | ✅ | Estructura, Git Flow, CI/CD |
-| 2. API Client | ✅ | Cliente + Caché |
-| 3. Database | ✅ | Modelos SQLAlchemy |
-| 4. Recopilación | ⏳ | Pendiente |
+| 2. API Client | ✅ | Cliente HTTP + Caché |
+| 3. Database | ✅ | Modelos SQLAlchemy + Alembic |
+| 4. Recopilación | ✅ | Collectors de datos |
 | 5. Features | ⏳ | Pendiente |
 | 6. Modelado | ⏳ | Pendiente |
 | 7. Backend API | ⏳ | Pendiente |
