@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"  # Ignorar variables extra en .env
 
 
 def get_settings() -> Settings:

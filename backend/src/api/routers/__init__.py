@@ -6,3 +6,4 @@ from . import predictions
 from . import stats  
 from . import fixtures
 from . import sync
+from . import training
