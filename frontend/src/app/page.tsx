@@ -5,6 +5,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { MatchCard } from "@/components/dashboard/MatchCard";
 import { Activity, Target, Trophy, TrendingUp, Calendar, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   return (

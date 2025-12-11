@@ -8,8 +8,8 @@ from typing import Dict, Optional
 
 from loguru import logger
 
-from ..db import get_db_session, StandingRepository
-from ..db.models import Standing
+from src.db import get_db_session, StandingRepository
+from src.db.models import Standing
 
 
 class StandingsCalculator:
