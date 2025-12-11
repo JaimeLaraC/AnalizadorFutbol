@@ -29,8 +29,8 @@
 | 2. API Client | ✅ | Cliente HTTP + Caché |
 | 3. Database | ✅ | Modelos SQLAlchemy + Alembic |
 | 4. Recopilación | ✅ | Collectors de datos |
-| 5. Features | ⏳ | Pendiente |
-| 6. Modelado | ⏳ | Pendiente |
+| 5. Features | ✅ | Pipeline Feature Engineering |
+| 6. Modelado | ✅ | XGBoost + LightGBM + Calibración |
 | 7. Backend API | ⏳ | Pendiente |
 | 8. Frontend | ⏳ | Pendiente |
 | 9. Testing | ⏳ | Pendiente |
