@@ -166,8 +166,8 @@ export default function Home() {
                 <span>August, 2024</span>
               </div>
               <div className="grid grid-cols-7 gap-2 text-center text-xs font-medium">
-                {["S", "M", "T", "W", "T", "F", "S"].map(d => (
-                  <span key={d} className="text-gray-400">{d}</span>
+                {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                  <span key={i} className="text-gray-400">{d}</span>
                 ))}
                 {Array.from({ length: 31 }, (_, i) => i + 1).slice(0, 14).map((d) => (
                   <span key={d} className={cn(
