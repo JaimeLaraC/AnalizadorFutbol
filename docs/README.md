@@ -32,8 +32,8 @@
 | 5. Features | ✅ | Pipeline Feature Engineering |
 | 6. Modelado | ✅ | XGBoost + LightGBM + Calibración |
 | 7. Backend API | ✅ | FastAPI + APScheduler |
-| 8. Frontend | ⏳ | Pendiente |
-| 9. Testing | ⏳ | Pendiente |
+| 8. Frontend | ✅ | Next.js Dashboard Premium |
+| 9. Testing | ⏳ | En progreso |
 
 ---
 

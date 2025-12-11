@@ -9,8 +9,8 @@ from datetime import datetime
 
 from loguru import logger
 
-from ..db import get_db_session, FixtureRepository
-from ..db.models import Fixture
+from src.db import get_db_session, FixtureRepository
+from src.db.models import Fixture
 
 
 class FormCalculator:
