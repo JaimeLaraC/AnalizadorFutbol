@@ -172,10 +172,12 @@ class EnsemblePredictor(BasePredictor):
             logger.info("Aplicando calibración de probabilidades...")
             self._calibrate_models(X_val, y_val)
         
+        # Marcar como entrenado antes de calcular métricas
+        self.is_fitted = True
+        
         # Calcular métricas finales
         self._calculate_metrics(X_val, y_val)
         
-        self.is_fitted = True
         self.metadata["trained_at"] = datetime.utcnow().isoformat()
         
         logger.info("Entrenamiento completado")
@@ -316,3 +318,60 @@ class EnsemblePredictor(BasePredictor):
         df = df.sort_values("mean", ascending=False)
         
         return df
+    
+    def save(self, path=None):
+        """Guarda el modelo con todos sus componentes."""
+        from pathlib import Path
+        import pickle
+        from ..utils.config import settings
+        
+        if path is None:
+            path = settings.models_dir / f"{self.name}_model.pkl"
+        else:
+            path = Path(path)
+        
+        path.parent.mkdir(parents=True, exist_ok=True)
+        
+        save_data = {
+            "name": self.name,
+            "is_fitted": self.is_fitted,
+            "feature_names": self.feature_names,
+            "metadata": self.metadata,
+            "use_calibration": self.use_calibration,
+            "calibration_method": self.calibration_method,
+            "scaler": self.scaler,
+            "models": self.models,
+            "weights": self.weights,
+            "calibrated_models": self.calibrated_models,
+        }
+        
+        with open(path, "wb") as f:
+            pickle.dump(save_data, f)
+        
+        logger.info(f"Modelo guardado: {path}")
+        return path
+    
+    def load(self, path):
+        """Carga el modelo con todos sus componentes."""
+        from pathlib import Path
+        import pickle
+        
+        path = Path(path)
+        
+        with open(path, "rb") as f:
+            save_data = pickle.load(f)
+        
+        self.name = save_data["name"]
+        self.is_fitted = save_data["is_fitted"]
+        self.feature_names = save_data["feature_names"]
+        self.metadata = save_data["metadata"]
+        self.use_calibration = save_data.get("use_calibration", True)
+        self.calibration_method = save_data.get("calibration_method", "isotonic")
+        self.scaler = save_data["scaler"]
+        self.models = save_data["models"]
+        self.weights = save_data["weights"]
+        self.calibrated_models = save_data.get("calibrated_models", {})
+        
+        logger.info(f"Modelo cargado: {path}")
+        return self
+

@@ -24,7 +24,7 @@ class League(Base):
     id = Column(Integer, primary_key=True)  # ID de API-Football
     name = Column(String(255), nullable=False)
     country = Column(String(100))
-    country_code = Column(String(3))
+    country_code = Column(String(10))
     logo = Column(String(500))
     type = Column(String(50))  # League, Cup
     

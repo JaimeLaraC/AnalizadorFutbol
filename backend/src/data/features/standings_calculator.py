@@ -26,11 +26,39 @@ class StandingsCalculator:
         team_id: int,
         league_id: int,
         season: int
-    ) -> Optional[Standing]:
-        """Obtiene la posición de un equipo en la liga."""
+    ) -> Optional[Dict]:
+        """Obtiene la posición de un equipo en la liga como dict."""
         with get_db_session() as db:
             repo = StandingRepository(db)
-            return repo.get_team_standing(team_id, league_id, season)
+            standing = repo.get_team_standing(team_id, league_id, season)
+            
+            if not standing:
+                return None
+            
+            # Extraer todos los valores mientras la sesión está activa
+            return {
+                'rank': standing.rank,
+                'points': standing.points,
+                'goals_diff': standing.goals_diff,
+                'played': standing.played,
+                'win': standing.win,
+                'draw': standing.draw,
+                'lose': standing.lose,
+                'goals_for': standing.goals_for,
+                'goals_against': standing.goals_against,
+                'home_played': standing.home_played,
+                'home_win': standing.home_win,
+                'home_draw': standing.home_draw,
+                'home_lose': standing.home_lose,
+                'home_goals_for': standing.home_goals_for,
+                'home_goals_against': standing.home_goals_against,
+                'away_played': standing.away_played,
+                'away_win': standing.away_win,
+                'away_draw': standing.away_draw,
+                'away_lose': standing.away_lose,
+                'away_goals_for': standing.away_goals_for,
+                'away_goals_against': standing.away_goals_against,
+            }
     
     def calculate_standing_features(
         self,
@@ -65,42 +93,42 @@ class StandingsCalculator:
         features = {}
         
         # Posición y puntos
-        features[f"{prefix}position"] = float(standing.rank)
-        features[f"{prefix}points"] = float(standing.points)
-        features[f"{prefix}goal_diff"] = float(standing.goals_diff or 0)
+        features[f"{prefix}position"] = float(standing['rank'])
+        features[f"{prefix}points"] = float(standing['points'])
+        features[f"{prefix}goal_diff"] = float(standing['goals_diff'] or 0)
         
         # Puntos por partido
-        played = standing.played or 1
-        features[f"{prefix}ppg"] = standing.points / played
+        played = standing['played'] or 1
+        features[f"{prefix}ppg"] = standing['points'] / played
         
         # Estadísticas generales
-        features[f"{prefix}played"] = float(standing.played or 0)
-        features[f"{prefix}wins"] = float(standing.win or 0)
-        features[f"{prefix}draws"] = float(standing.draw or 0)
-        features[f"{prefix}losses"] = float(standing.lose or 0)
-        features[f"{prefix}goals_for"] = float(standing.goals_for or 0)
-        features[f"{prefix}goals_against"] = float(standing.goals_against or 0)
+        features[f"{prefix}played"] = float(standing['played'] or 0)
+        features[f"{prefix}wins"] = float(standing['win'] or 0)
+        features[f"{prefix}draws"] = float(standing['draw'] or 0)
+        features[f"{prefix}losses"] = float(standing['lose'] or 0)
+        features[f"{prefix}goals_for"] = float(standing['goals_for'] or 0)
+        features[f"{prefix}goals_against"] = float(standing['goals_against'] or 0)
         
         # Ratios
-        features[f"{prefix}win_ratio"] = (standing.win or 0) / played
-        features[f"{prefix}goals_per_game"] = (standing.goals_for or 0) / played
-        features[f"{prefix}conceded_per_game"] = (standing.goals_against or 0) / played
+        features[f"{prefix}win_ratio"] = (standing['win'] or 0) / played
+        features[f"{prefix}goals_per_game"] = (standing['goals_for'] or 0) / played
+        features[f"{prefix}conceded_per_game"] = (standing['goals_against'] or 0) / played
         
         # Stats como local
-        home_played = standing.home_played or 1
-        features[f"{prefix}home_wins"] = float(standing.home_win or 0)
+        home_played = standing['home_played'] or 1
+        features[f"{prefix}home_wins"] = float(standing['home_win'] or 0)
         features[f"{prefix}home_ppg"] = (
-            (standing.home_win or 0) * 3 + (standing.home_draw or 0)
+            (standing['home_win'] or 0) * 3 + (standing['home_draw'] or 0)
         ) / home_played
-        features[f"{prefix}home_goals_per_game"] = (standing.home_goals_for or 0) / home_played
+        features[f"{prefix}home_goals_per_game"] = (standing['home_goals_for'] or 0) / home_played
         
         # Stats como visitante
-        away_played = standing.away_played or 1
-        features[f"{prefix}away_wins"] = float(standing.away_win or 0)
+        away_played = standing['away_played'] or 1
+        features[f"{prefix}away_wins"] = float(standing['away_win'] or 0)
         features[f"{prefix}away_ppg"] = (
-            (standing.away_win or 0) * 3 + (standing.away_draw or 0)
+            (standing['away_win'] or 0) * 3 + (standing['away_draw'] or 0)
         ) / away_played
-        features[f"{prefix}away_goals_per_game"] = (standing.away_goals_for or 0) / away_played
+        features[f"{prefix}away_goals_per_game"] = (standing['away_goals_for'] or 0) / away_played
         
         return features
     

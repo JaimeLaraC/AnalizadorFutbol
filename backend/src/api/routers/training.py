@@ -128,39 +128,53 @@ def run_collect_task(seasons: List[int], leagues: Optional[List[int]]):
     try:
         training_state.log(f"📥 Recopilando temporadas: {seasons}")
         
-        # Importar componentes
-        from ..data.collector import HistoricalCollector
-        from ..api_client import CachedAPIClient
+        # Importar componentes usando imports absolutos
+        from src.data import MasterCollector, TOP_LEAGUES
+        from src.api_client import CachedAPIClient
+        
+        # Obtener ligas objetivo
+        configured_leagues = list(TOP_LEAGUES.keys())
+        target_leagues = leagues or configured_leagues
+        
+        training_state.log(f"🏟️ Ligas seleccionadas: {len(target_leagues)}")
         
         client = CachedAPIClient()
-        collector = HistoricalCollector(client)
+        collector = MasterCollector(client)
         
-        # Obtener ligas configuradas
-        configured_leagues = [
-            140,  # La Liga
-            39,   # Premier League
-            135,  # Serie A
-            78,   # Bundesliga
-            61,   # Ligue 1
-        ]
-        
-        target_leagues = leagues or configured_leagues
         total_fixtures = 0
+        total_teams = 0
         
-        for i, league_id in enumerate(target_leagues):
-            training_state.progress = int((i / len(target_leagues)) * 100)
-            training_state.log(f"📊 Liga {league_id}: recopilando...")
+        for i, season in enumerate(seasons):
+            training_state.progress = int(((i + 1) / len(seasons)) * 80)
+            training_state.log(f"📅 Temporada {season}/{season+1}:")
             
-            for season in seasons:
-                try:
-                    fixtures = collector.collect_league_season(league_id, season)
-                    total_fixtures += len(fixtures) if fixtures else 0
-                    training_state.log(f"   Temporada {season}: {len(fixtures) if fixtures else 0} partidos")
-                except Exception as e:
-                    training_state.log(f"   ⚠️ Error en {league_id}/{season}: {str(e)[:50]}")
+            try:
+                result = collector.sync_full_season(
+                    season=season,
+                    league_ids=target_leagues,
+                    include_standings=True
+                )
+                
+                fixtures = result.get("totals", {}).get("fixtures", 0)
+                teams = result.get("totals", {}).get("teams", 0)
+                total_fixtures += fixtures
+                total_teams += teams
+                
+                training_state.log(f"   ✅ {teams} equipos, {fixtures} partidos")
+                
+                if result.get("errors"):
+                    for err in result["errors"][:3]:
+                        training_state.log(f"   ⚠️ {err[:50]}")
+                        
+            except Exception as e:
+                training_state.log(f"   ❌ Error: {str(e)[:50]}")
+        
+        training_state.progress = 100
+        collector.close()
         
         training_state.complete({
             "total_fixtures": total_fixtures,
+            "total_teams": total_teams,
             "leagues": len(target_leagues),
             "seasons": seasons
         })
@@ -174,13 +188,12 @@ def run_features_task(min_matches: int):
     try:
         training_state.log("⚙️ Generando features...")
         
-        from ..data.features import FeaturePipeline
-        from ..db import get_db_session, FixtureRepository
+        from src.data.features import FeaturePipeline
+        from src.db import get_db_session, Fixture
         
         # Contar partidos disponibles
         with get_db_session() as db:
-            repo = FixtureRepository(db)
-            total = db.query(repo.model).filter(repo.model.status == "FT").count()
+            total = db.query(Fixture).filter(Fixture.status == "FT").count()
         
         training_state.log(f"📊 Partidos terminados en BD: {total}")
         
@@ -196,7 +209,7 @@ def run_features_task(min_matches: int):
         training_state.progress = 40
         training_state.log("📐 Calculando features por partido...")
         
-        df = pipeline.build_training_dataset(min_matches=min_matches)
+        df = pipeline.generate_training_dataset(exclude_draws=True)
         
         training_state.progress = 80
         training_state.log(f"💾 Dataset generado: {len(df)} filas, {len(df.columns)} columnas")
@@ -221,7 +234,8 @@ def run_train_task(test_size: float, calibrate: bool):
     try:
         training_state.log("🤖 Iniciando entrenamiento...")
         
-        from ..models import ModelTrainer
+        from src.models import ModelTrainer
+        from src.models.ensemble_predictor import EnsemblePredictor
         import pandas as pd
         
         # Cargar dataset
@@ -236,28 +250,32 @@ def run_train_task(test_size: float, calibrate: bool):
         
         training_state.log(f"   {len(df)} muestras cargadas")
         
-        # Entrenar
+        if len(df) < 50:
+            training_state.fail(f"Dataset muy pequeño ({len(df)} muestras). Se necesitan al menos 50.")
+            return
+        
+        # Crear predictor con calibración
         training_state.progress = 30
         training_state.log("🏋️ Entrenando XGBoost...")
         
-        trainer = ModelTrainer()
+        predictor = EnsemblePredictor(use_calibration=calibrate)
+        trainer = ModelTrainer(predictor=predictor)
         
         training_state.progress = 50
         training_state.log("🏋️ Entrenando LightGBM...")
         
-        metrics = trainer.train(df, test_size=test_size, calibrate=calibrate)
+        # Entrenar (save_model=True guarda automáticamente)
+        metrics = trainer.train(df, save_model=True)
         
         training_state.progress = 90
-        training_state.log("💾 Guardando modelo...")
-        
-        trainer.save()
+        training_state.log("💾 Modelo guardado")
         
         training_state.complete({
             "accuracy": metrics.get("accuracy", 0),
             "precision": metrics.get("precision", 0),
             "recall": metrics.get("recall", 0),
             "f1_score": metrics.get("f1_score", 0),
-            "model_version": metrics.get("version", "v1")
+            "samples": len(df)
         })
         
     except Exception as e:
