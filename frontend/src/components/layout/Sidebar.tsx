@@ -11,6 +11,8 @@ import {
     Activity,
     Zap,
     Brain,
+    Globe,
+    Database,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -19,6 +21,8 @@ const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/" },
     { icon: Zap, label: "Predicciones", href: "/predictions" },
     { icon: BarChart2, label: "Estadísticas", href: "/stats" },
+    { icon: Globe, label: "Ligas", href: "/leagues" },
+    { icon: Database, label: "Datos", href: "/database" },
     { icon: Brain, label: "Entrenamiento", href: "/training" },
     { icon: RefreshCcw, label: "Sincronización", href: "/sync" },
     { icon: Settings, label: "Configuración", href: "/settings" },

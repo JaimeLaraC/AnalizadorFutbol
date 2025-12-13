@@ -214,32 +214,33 @@ class FeaturePipeline:
                 fixtures = [f for f in fixtures if f.league_id in league_ids]
             if season:
                 fixtures = [f for f in fixtures if f.season == season]
-        
-        logger.info(f"Procesando {len(fixtures)} partidos...")
-        
-        data = []
-        for i, fixture in enumerate(fixtures):
-            try:
-                match_features = self.calculate_fixture_features(fixture)
-                
-                row = {
-                    "fixture_id": match_features.fixture_id,
-                    "home_team_id": match_features.home_team_id,
-                    "away_team_id": match_features.away_team_id,
-                    "league_id": match_features.league_id,
-                    "season": match_features.season,
-                    "date": match_features.date,
-                    "target": match_features.target,
-                    **match_features.features
-                }
-                data.append(row)
-                
-                if (i + 1) % 100 == 0:
-                    logger.info(f"Procesados {i + 1}/{len(fixtures)} partidos")
+            
+            logger.info(f"Procesando {len(fixtures)} partidos...")
+            
+            data = []
+            for i, fixture in enumerate(fixtures):
+                try:
+                    match_features = self.calculate_fixture_features(fixture)
                     
-            except Exception as e:
-                logger.warning(f"Error procesando fixture {fixture.id}: {e}")
-                continue
+                    row = {
+                        "fixture_id": match_features.fixture_id,
+                        "home_team_id": match_features.home_team_id,
+                        "away_team_id": match_features.away_team_id,
+                        "league_id": match_features.league_id,
+                        "season": match_features.season,
+                        "date": match_features.date,
+                        "target": match_features.target,
+                        **match_features.features
+                    }
+                    data.append(row)
+                    
+                    if (i + 1) % 500 == 0:
+                        logger.info(f"Procesados {i + 1}/{len(fixtures)} partidos ({len(data)} válidos)")
+                        
+                except Exception as e:
+                    if (i + 1) % 1000 == 0:
+                        logger.warning(f"Error procesando fixture: {e}")
+                    continue
         
         df = pd.DataFrame(data)
         logger.info(f"Dataset generado: {len(df)} filas, {len(df.columns)} columnas")

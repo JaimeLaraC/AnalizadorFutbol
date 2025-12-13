@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
-from .routers import predictions, stats, fixtures, sync, training
+from .routers import predictions, stats, fixtures, sync, training, leagues
 from .schemas import HealthCheck
 from ..utils.config import settings
 from ..db import init_db
@@ -114,6 +114,12 @@ app.include_router(
     training.router,
     prefix="/training",
     tags=["Training"]
+)
+
+app.include_router(
+    leagues.router,
+    prefix="/leagues",
+    tags=["Leagues"]
 )
 
 

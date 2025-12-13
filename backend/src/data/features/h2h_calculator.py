@@ -28,7 +28,7 @@ class H2HCalculator:
         team2_id: int,
         before_date: datetime,
         limit: int = 10
-    ) -> List[Fixture]:
+    ) -> List[Dict]:
         """
         Obtiene enfrentamientos históricos entre dos equipos.
         
@@ -39,7 +39,7 @@ class H2HCalculator:
             limit: Máximo de partidos
             
         Returns:
-            Lista de fixtures H2H
+            Lista de diccionarios con datos H2H
         """
         with get_db_session() as db:
             from sqlalchemy import or_, and_
@@ -61,7 +61,14 @@ class H2HCalculator:
                 )
             ).order_by(Fixture.date.desc()).limit(limit).all()
             
-            return fixtures
+            # Convertir a diccionarios dentro de la sesión
+            return [{
+                'id': f.id,
+                'home_team_id': f.home_team_id,
+                'away_team_id': f.away_team_id,
+                'home_goals': f.home_goals,
+                'away_goals': f.away_goals,
+            } for f in fixtures]
     
     def calculate_h2h_features(
         self,
@@ -106,14 +113,14 @@ class H2HCalculator:
         
         for f in fixtures:
             # Determinar quién es quién en este partido
-            if f.home_team_id == home_team_id:
+            if f['home_team_id'] == home_team_id:
                 # home_team_id era local en este partido
-                h_goals = f.home_goals or 0
-                a_goals = f.away_goals or 0
+                h_goals = f['home_goals'] or 0
+                a_goals = f['away_goals'] or 0
             else:
                 # home_team_id era visitante en este partido
-                h_goals = f.away_goals or 0
-                a_goals = f.home_goals or 0
+                h_goals = f['away_goals'] or 0
+                a_goals = f['home_goals'] or 0
             
             home_goals += h_goals
             away_goals += a_goals
@@ -143,10 +150,11 @@ class H2HCalculator:
         recent = fixtures[:5]
         recent_home_wins = sum(
             1 for f in recent 
-            if (f.home_team_id == home_team_id and (f.home_goals or 0) > (f.away_goals or 0))
-            or (f.away_team_id == home_team_id and (f.away_goals or 0) > (f.home_goals or 0))
+            if (f['home_team_id'] == home_team_id and (f['home_goals'] or 0) > (f['away_goals'] or 0))
+            or (f['away_team_id'] == home_team_id and (f['away_goals'] or 0) > (f['home_goals'] or 0))
         )
         features["h2h_recent_home_wins"] = float(recent_home_wins)
         features["h2h_recent_home_rate"] = recent_home_wins / len(recent) if recent else 0.5
         
         return features
+

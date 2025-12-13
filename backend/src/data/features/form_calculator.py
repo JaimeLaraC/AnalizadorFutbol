@@ -31,7 +31,7 @@ class FormCalculator:
         limit: int = 10,
         home_only: bool = False,
         away_only: bool = False
-    ) -> List[Fixture]:
+    ) -> List[Dict]:
         """
         Obtiene partidos recientes de un equipo antes de una fecha.
         
@@ -43,7 +43,7 @@ class FormCalculator:
             away_only: Solo partidos como visitante
             
         Returns:
-            Lista de fixtures ordenados por fecha descendente
+            Lista de diccionarios con datos de fixtures
         """
         with get_db_session() as db:
             repo = FixtureRepository(db)
@@ -51,7 +51,7 @@ class FormCalculator:
             # Obtener más partidos y filtrar
             fixtures = repo.get_team_fixtures(team_id, limit=limit * 2)
             
-            # Filtrar por fecha y estado
+            # Filtrar por fecha y estado y convertir a diccionarios
             filtered = []
             for f in fixtures:
                 if f.date < before_date and f.status == "FT":
@@ -59,7 +59,16 @@ class FormCalculator:
                         continue
                     if away_only and f.away_team_id != team_id:
                         continue
-                    filtered.append(f)
+                    # Copiar datos a diccionario
+                    filtered.append({
+                        'id': f.id,
+                        'home_team_id': f.home_team_id,
+                        'away_team_id': f.away_team_id,
+                        'home_goals': f.home_goals,
+                        'away_goals': f.away_goals,
+                        'date': f.date,
+                        'status': f.status,
+                    })
                     if len(filtered) >= limit:
                         break
             
@@ -67,15 +76,15 @@ class FormCalculator:
     
     def _calculate_points(
         self,
-        fixtures: List[Fixture],
+        fixtures: List[Dict],
         team_id: int
     ) -> int:
         """Calcula puntos obtenidos (W=3, D=1, L=0)."""
         points = 0
         for f in fixtures:
-            is_home = f.home_team_id == team_id
-            home_goals = f.home_goals or 0
-            away_goals = f.away_goals or 0
+            is_home = f['home_team_id'] == team_id
+            home_goals = f['home_goals'] or 0
+            away_goals = f['away_goals'] or 0
             
             if is_home:
                 if home_goals > away_goals:
@@ -92,7 +101,7 @@ class FormCalculator:
     
     def _calculate_goals(
         self,
-        fixtures: List[Fixture],
+        fixtures: List[Dict],
         team_id: int
     ) -> tuple:
         """Calcula goles a favor y en contra."""
@@ -100,9 +109,9 @@ class FormCalculator:
         goals_against = 0
         
         for f in fixtures:
-            is_home = f.home_team_id == team_id
-            home_goals = f.home_goals or 0
-            away_goals = f.away_goals or 0
+            is_home = f['home_team_id'] == team_id
+            home_goals = f['home_goals'] or 0
+            away_goals = f['away_goals'] or 0
             
             if is_home:
                 goals_for += home_goals
@@ -115,16 +124,16 @@ class FormCalculator:
     
     def _calculate_wins_draws_losses(
         self,
-        fixtures: List[Fixture],
+        fixtures: List[Dict],
         team_id: int
     ) -> tuple:
         """Calcula victorias, empates y derrotas."""
         wins = draws = losses = 0
         
         for f in fixtures:
-            is_home = f.home_team_id == team_id
-            home_goals = f.home_goals or 0
-            away_goals = f.away_goals or 0
+            is_home = f['home_team_id'] == team_id
+            home_goals = f['home_goals'] or 0
+            away_goals = f['away_goals'] or 0
             
             if is_home:
                 if home_goals > away_goals:
@@ -145,7 +154,7 @@ class FormCalculator:
     
     def _calculate_streak(
         self,
-        fixtures: List[Fixture],
+        fixtures: List[Dict],
         team_id: int
     ) -> Dict[str, int]:
         """Calcula rachas actuales."""
@@ -154,9 +163,9 @@ class FormCalculator:
         winless_streak = 0
         
         for f in fixtures:
-            is_home = f.home_team_id == team_id
-            home_goals = f.home_goals or 0
-            away_goals = f.away_goals or 0
+            is_home = f['home_team_id'] == team_id
+            home_goals = f['home_goals'] or 0
+            away_goals = f['away_goals'] or 0
             
             if is_home:
                 won = home_goals > away_goals
@@ -194,7 +203,7 @@ class FormCalculator:
     
     def _calculate_clean_sheets(
         self,
-        fixtures: List[Fixture],
+        fixtures: List[Dict],
         team_id: int
     ) -> tuple:
         """Calcula porterías a cero y partidos sin marcar."""
@@ -202,9 +211,9 @@ class FormCalculator:
         failed_to_score = 0
         
         for f in fixtures:
-            is_home = f.home_team_id == team_id
-            home_goals = f.home_goals or 0
-            away_goals = f.away_goals or 0
+            is_home = f['home_team_id'] == team_id
+            home_goals = f['home_goals'] or 0
+            away_goals = f['away_goals'] or 0
             
             if is_home:
                 if away_goals == 0:
@@ -314,14 +323,24 @@ class FormCalculator:
             repo = FixtureRepository(db)
             fixtures = repo.get_team_fixtures(team_id, limit=20)
             
-            # Filtrar por home/away
+            # Filtrar por home/away y convertir a diccionarios
             filtered = []
             for f in fixtures:
                 if f.date < before_date and f.status == "FT":
                     if is_home and f.home_team_id == team_id:
-                        filtered.append(f)
+                        filtered.append({
+                            'home_team_id': f.home_team_id,
+                            'away_team_id': f.away_team_id,
+                            'home_goals': f.home_goals,
+                            'away_goals': f.away_goals,
+                        })
                     elif not is_home and f.away_team_id == team_id:
-                        filtered.append(f)
+                        filtered.append({
+                            'home_team_id': f.home_team_id,
+                            'away_team_id': f.away_team_id,
+                            'home_goals': f.home_goals,
+                            'away_goals': f.away_goals,
+                        })
                     if len(filtered) >= 5:
                         break
         
@@ -341,3 +360,4 @@ class FormCalculator:
         features[f"{prefix}form_goals_against_avg"] = ga / n
         
         return features
+
