@@ -90,11 +90,11 @@ class FeaturePipeline:
         )
         features.update(away_at_away)
         
-        # 2. Features de standings
+        # 2. Features de standings (IMPORTANTE: usar match_date para evitar data leakage)
         logger.debug(f"Calculando standings para fixture {fixture.id}")
         
         standings_features = self.standings_calc.calculate_relative_features(
-            home_id, away_id, league_id, season
+            home_id, away_id, league_id, season, before_date=match_date
         )
         features.update(standings_features)
         

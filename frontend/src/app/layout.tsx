@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 
 const outfit = Outfit({
@@ -20,17 +21,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body
         className={cn(
           outfit.variable,
-          "antialiased min-h-screen pl-72 pr-6 py-6"
+          "antialiased min-h-screen"
         )}
       >
-        <Sidebar />
-        <main className="min-h-[calc(100vh-3rem)]">
-          {children}
-        </main>
+        <ThemeProvider defaultTheme="dark" storageKey="app-theme">
+          <div className="flex min-h-screen">
+            <Sidebar />
+            <main className="flex-1 ml-4 lg:ml-72 transition-all duration-300 p-6">
+              {children}
+            </main>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -274,7 +274,7 @@ def run_train_task(test_size: float, calibrate: bool):
             "accuracy": metrics.get("accuracy", 0),
             "precision": metrics.get("precision", 0),
             "recall": metrics.get("recall", 0),
-            "f1_score": metrics.get("f1_score", 0),
+            "f1_score": metrics.get("f1_score", metrics.get("f1", 0)),
             "samples": len(df)
         })
         

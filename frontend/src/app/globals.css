@@ -1,20 +1,62 @@
 @import "tailwindcss";
 
-:root {
-  --background: #F5F5F7;
-  --foreground: #18181B;
-  
-  --sidebar: #1C1C1E;
-  --sidebar-foreground: #FAFAFA;
-  --sidebar-accent: #D2F674;
-  --sidebar-muted: #A1A1AA;
-  
-  --card: #FFFFFF;
-  --card-foreground: #18181B;
-  
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --error: #ef4444;
+@layer base {
+  :root {
+    /* Light Mode Variables */
+    --background: #F5F5F7;
+    --foreground: #09090b;
+
+    /* Sidebar adaptativa al modo claro para mejor integración */
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #09090b;
+    --sidebar-accent: #84CC16;
+    /* Un verde un poco más oscuro para mejor contraste en blanco (Lime-500) o mantener #D2F674 si se usa con fondos oscuros */
+    --sidebar-accent-foreground: #FFFFFF;
+    --sidebar-border: #e4e4e7;
+    --sidebar-ring: #84CC16;
+    --sidebar-muted: #52525b;
+    /* Zinc-600 - Mucho más oscuro para legibilidad en fondo claro */
+
+    --card: #FFFFFF;
+    --card-foreground: #09090b;
+    --card-border: #e4e4e7;
+
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.05);
+
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #ef4444;
+
+    --shadow-glow: 0 0 15px -5px rgba(0, 0, 0, 0.1);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+
+    --backdrop-blur-glass: blur(12px);
+  }
+
+  .dark {
+    /* Dark Mode Variables */
+    --background: #09090b;
+    --foreground: #fafafa;
+
+    --sidebar: #18181b;
+    --sidebar-foreground: #fafafa;
+    --sidebar-accent: #D2F674;
+    --sidebar-accent-foreground: #18181b;
+    --sidebar-border: #27272a;
+    --sidebar-ring: #D2F674;
+    --sidebar-muted: #a1a1aa;
+
+    --card: #18181b;
+    --card-foreground: #fafafa;
+    --card-border: #27272a;
+
+    --glass-bg: rgba(24, 24, 27, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.05);
+
+    --shadow-glow: 0 0 20px -5px var(--sidebar-accent);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
 }
 
 @theme inline {
@@ -23,35 +65,91 @@
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-muted: var(--sidebar-muted);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-card-border: var(--card-border);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-error: var(--error);
-  
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   overflow-x: hidden;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Background Gradients */
+body {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(210, 246, 116, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(39, 39, 42, 0.05) 0px, transparent 50%);
+}
+
+.dark body {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(210, 246, 116, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(39, 39, 42, 0.1) 0px, transparent 50%);
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-hover:hover {
+  background: var(--card);
+  /* Fallback or specific hover color */
+  border-color: var(--sidebar-accent);
+  box-shadow: 0 0 15px -3px rgba(210, 246, 116, 0.1);
+}
+
+.dark .glass-hover:hover {
+  background: rgba(24, 24, 27, 0.8);
+  border-color: rgba(210, 246, 116, 0.2);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #E4E4E5;
-  border-radius: 4px;
+  background: #27272a;
+  border-radius: 3px;
 }
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
+}
+
+.light ::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #CAFA65;
+  background: #71717a;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
 }

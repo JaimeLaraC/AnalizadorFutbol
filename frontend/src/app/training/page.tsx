@@ -197,11 +197,11 @@ export default function TrainingPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white rounded-3xl shadow-sm overflow-hidden"
+                        className="glass rounded-3xl shadow-sm overflow-hidden"
                     >
                         {/* Step Header */}
                         <div
-                            className="p-6 flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                            className="p-6 flex items-center gap-4 cursor-pointer hover:bg-card-foreground/5 transition-colors"
                             onClick={() => setExpandedStep(expandedStep === step.id ? null : step.id)}
                         >
                             <div className={cn(
@@ -266,7 +266,7 @@ export default function TrainingPage() {
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: "auto", opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                className="border-t border-gray-100 p-6 bg-gray-50"
+                                className="border-t border-card-border p-6 bg-card-foreground/[0.02]"
                             >
                                 {/* Step 1: Recopilación */}
                                 {step.id === 1 && (
@@ -425,7 +425,7 @@ export default function TrainingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-3xl p-6 shadow-sm mb-8"
+                className="glass rounded-3xl p-6 shadow-sm mb-8"
             >
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-foreground">Estado Actual</h3>
@@ -514,7 +514,7 @@ export default function TrainingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="bg-sidebar rounded-3xl p-6 shadow-lg"
+                className="bg-[#18181b] rounded-3xl p-6 shadow-lg border border-white/10"
             >
                 <div className="flex items-center gap-2 mb-4">
                     <Terminal className="w-5 h-5 text-sidebar-accent" />
