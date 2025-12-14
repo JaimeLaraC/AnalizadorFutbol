@@ -14,33 +14,48 @@ from ..db import get_db_session, LeagueRepository
 from ..db.models import League
 
 
-# Ligas principales europeas para priorizar
+# Ligas principales para el modelo de predicción (30 ligas)
 TOP_LEAGUES = {
     # Top 5 europeas
-    39: "Premier League",         # Inglaterra
-    140: "La Liga",               # España
-    135: "Serie A",               # Italia
-    78: "Bundesliga",             # Alemania
-    61: "Ligue 1",                # Francia
+    39: "Premier League",           # 🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra
+    140: "La Liga",                 # 🇪🇸 España
+    135: "Serie A",                 # 🇮🇹 Italia
+    78: "Bundesliga",               # 🇩🇪 Alemania
+    61: "Ligue 1",                  # 🇫🇷 Francia
     
-    # Otras importantes
-    2: "Champions League",
-    3: "Europa League",
-    848: "Conference League",
+    # Otras europeas top
+    88: "Eredivisie",               # 🇳🇱 Holanda
+    94: "Primeira Liga",            # 🇵🇹 Portugal
+    144: "Jupiler Pro League",      # 🇧🇪 Bélgica
+    203: "Super Lig",               # 🇹🇷 Turquía
+    179: "Premiership",             # 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Escocia
     
-    # Segundas divisiones top
-    40: "Championship",           # Inglaterra
-    141: "La Liga 2",             # España
-    136: "Serie B",               # Italia
+    # Europa Central/Este
+    235: "Premier League RU",       # 🇷🇺 Rusia
+    119: "Superliga",               # 🇩🇰 Dinamarca
+    103: "Eliteserien",             # 🇳🇴 Noruega
+    113: "Allsvenskan",             # 🇸🇪 Suecia
+    106: "Ekstraklasa",             # 🇵🇱 Polonia
+    218: "Bundesliga AT",           # 🇦🇹 Austria
+    207: "Super League CH",         # 🇨🇭 Suiza
+    197: "Super League GR",         # 🇬🇷 Grecia
+    210: "Czech Liga",              # 🇨🇿 Chequia
     
-    # Otras ligas europeas
-    88: "Eredivisie",             # Holanda
-    94: "Primeira Liga",          # Portugal
-    144: "Jupiler Pro League",    # Bélgica
+    # Segundas divisiones importantes
+    40: "Championship",             # 🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra 2
+    141: "La Liga 2",               # 🇪🇸 España 2
+    136: "Serie B",                 # 🇮🇹 Italia 2
+    79: "2. Bundesliga",            # 🇩🇪 Alemania 2
+    62: "Ligue 2",                  # 🇫🇷 Francia 2
     
     # Sudamérica
-    71: "Brasileirão Serie A",
-    128: "Liga Profesional Argentina",
+    71: "Brasileirão Serie A",      # 🇧🇷 Brasil
+    128: "Liga Profesional",        # 🇦🇷 Argentina
+    
+    # Resto del mundo
+    253: "MLS",                     # 🇺🇸 Estados Unidos
+    292: "K League 1",              # 🇰🇷 Corea del Sur
+    188: "J1 League",               # 🇯🇵 Japón
 }
 
 
