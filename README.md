@@ -1,96 +1,113 @@
 # AnalizadorFutbol 🎯⚽
 
-Sistema de Inteligencia Artificial para predicción de partidos de fútbol.
+Sistema de predicción de partidos de fútbol con Machine Learning.
 
-## 📋 Descripción
+## 📊 Resultados del Modelo
 
-Modelo de Machine Learning que predice resultados de partidos de fútbol (victoria local o visitante) con el objetivo de maximizar la fiabilidad de las predicciones. El sistema analiza datos históricos y genera diariamente las **Top 5 predicciones** con mayor confianza.
+| Estrategia | Precisión | Período |
+|------------|-----------|---------|
+| TOP 8 diario | **94.4%** | Diciembre 2025 |
+| TOP 2 diario | **95.2%** | Diciembre 2025 |
+| TOP 2 finde | **100%** | Oct-Nov 2025 |
 
-## 🎯 Características
-
-- **Predicción binaria**: Solo 1 (local gana) o 2 (visitante gana) - empates excluidos
-- **Umbral de confianza**: 75% mínimo para recomendar
-- **Top 5 diario**: Las 5 predicciones con mayor probabilidad
-- **Cobertura global**: Todas las ligas del mundo
-- **Dashboard web**: Interfaz moderna para visualizar predicciones
-
-## 🏗️ Arquitectura
-
-```
-AnalizadorFutbol/
-├── backend/          # Python API + ML
-├── frontend/         # Next.js Dashboard
-├── notebooks/        # Exploración y training
-├── docs/             # Documentación
-└── .github/          # CI/CD
-```
-
-## 🛠️ Stack Tecnológico
-
-| Capa | Tecnología |
-|------|------------|
-| Backend | Python 3.11, FastAPI |
-| ML | scikit-learn, XGBoost, LightGBM |
-| Base de datos | PostgreSQL |
-| Frontend | Next.js 14, React, Tailwind |
-| API Datos | API-Football (Pro) |
-
-## 📊 Features del Modelo
-
-El modelo utiliza ~69 features pre-partido:
-- Forma histórica del equipo
-- Estadísticas agregadas de temporada
-- Contexto de liga (posición, puntos)
-- Head-to-head histórico
-- Cuotas del mercado de apuestas
-- Predicciones de API-Football
-
-## 🚀 Instalación
+## 🚀 Inicio Rápido
 
 ```bash
-# Clonar repositorio
-git clone https://github.com/tu-usuario/AnalizadorFutbol.git
-cd AnalizadorFutbol
+# 1. Clonar y configurar
+git clone https://github.com/JaimeLaraC/AnalizadorFutbol.git
+cd AnalizadorFutbol/backend
 
-# Backend
-cd backend
+# 2. Entorno virtual
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Frontend
-cd ../frontend
-npm install
+# 3. Configurar .env (copiar de .env.example)
+cp .env.example .env
+# Editar con tus credenciales de PostgreSQL y API-Football
+
+# 4. Verificar modelo
+python -c "
+import joblib
+m = joblib.load('models/trained/main_model.pkl')
+print(f'✅ Modelo cargado: {m[\"model_type\"]} con {len(m[\"feature_columns\"])} features')
+"
 ```
 
-## ⚙️ Configuración
+## 🔮 Generar Predicciones
 
-Crear archivo `.env` en `backend/`:
+```bash
+cd backend && source venv/bin/activate
+
+# TOP 10 de hoy
+python -c "
+from datetime import datetime
+import pandas as pd, joblib
+from src.db.database import get_db_session
+from src.db.models import Team, Fixture, League
+from src.data.features.pipeline import FeaturePipeline
+
+model_data = joblib.load('models/trained/main_model.pkl')
+model, feature_cols = model_data['model'], model_data['feature_columns']
+
+today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+tomorrow = today.replace(day=today.day + 1)
+
+with get_db_session() as db:
+    teams = {t.id: t.name for t in db.query(Team).all()}
+    fixtures = db.query(Fixture).filter(Fixture.date >= today, Fixture.date < tomorrow).all()
+
+pipeline = FeaturePipeline()
+preds = []
+for f in fixtures:
+    try:
+        with get_db_session() as db:
+            fix = db.query(Fixture).filter(Fixture.id == f.id).first()
+            feat = pipeline.calculate_fixture_features(fix)
+            if feat and feat.features:
+                X = pd.DataFrame([feat.features]).reindex(columns=feature_cols, fill_value=0)
+                preds.append({'home': teams[f.home_team_id], 'away': teams[f.away_team_id],
+                    'pred': model.predict(X)[0], 'conf': max(model.predict_proba(X)[0])})
+    except: pass
+
+for i, p in enumerate(sorted(preds, key=lambda x: -x['conf'])[:10], 1):
+    winner = p['home'] if p['pred'] == 1 else p['away']
+    print(f'{i}. {p[\"home\"]} vs {p[\"away\"]} → {winner} ({p[\"conf\"]:.0%})')
+"
 ```
-API_FOOTBALL_KEY=tu_api_key
-DATABASE_URL=postgresql://user:pass@localhost:5432/futbol_db
+
+## 🤖 Modelo
+
+- **Algoritmo**: Random Forest
+- **Features**: 156 (forma, clasificación, H2H)
+- **Entrenado con**: 5 grandes ligas (7,234 partidos de 2023-2024)
+- **Target**: 1 = Local gana, 0 = Visitante gana
+- **Empates**: Excluidos
+
+## 📁 Estructura
+
+```
+AnalizadorFutbol/
+├── backend/
+│   ├── models/trained/main_model.pkl  # Modelo entrenado
+│   ├── data/training_data.csv         # Datos de entrenamiento
+│   ├── src/
+│   │   ├── api/                       # FastAPI
+│   │   ├── data/features/             # Feature engineering
+│   │   └── db/                        # PostgreSQL models
+│   └── requirements.txt
+├── frontend/                          # Next.js dashboard
+└── PROJECT_CONTEXT.md                 # Documentación completa
 ```
 
 ## 📖 Documentación
 
-- [Plan de Implementación](docs/implementation_plan.md)
-- [Catálogo de Features](docs/features_catalog.md)
-- [Guía de Git](docs/git_guide.md)
-- [ADRs](docs/adr/)
-
-## 🔀 Git Flow
-
-Este proyecto sigue Git Flow:
-- `main` - Producción
-- `develop` - Integración
-- `feature/*` - Nuevas funcionalidades
-
-Ver [Guía de Git](docs/git_guide.md) para más detalles.
-
-## 📝 Licencia
-
-Este proyecto es privado y de uso personal.
+Ver **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)** para documentación completa con:
+- Scripts de predicción detallados
+- Sincronización de datos
+- Lista completa de features
+- Notas de validación
 
 ---
 
-*Desarrollado con 🤖 IA + ☕ Café*
+*Desarrollado con 🤖 ML + ⚽ Fútbol*
