@@ -10,6 +10,16 @@ Sistema de predicción de partidos de fútbol con Machine Learning.
 | TOP 2 diario | **95.2%** | Diciembre 2025 |
 | TOP 2 finde | **100%** | Oct-Nov 2025 |
 
+## 🤖 Modelo
+
+- **Algoritmo**: Random Forest (156 features)
+- **Entrenado con**: 29 ligas de 19 países (13,335 partidos)
+- **Target**: 1 = Local gana, 0 = Visitante gana
+- **Empates**: Excluidos
+
+### Ligas incluidas
+🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League, Championship | 🇪🇸 La Liga, Segunda División | 🇩🇪 Bundesliga, 2. Bundesliga | 🇮🇹 Serie A, Serie B | 🇫🇷 Ligue 1, Ligue 2 | 🇵🇹 Primeira Liga | 🇳🇱 Eredivisie | 🇧🇷 Serie A Brasil | 🇦🇷 Liga Argentina | 🇹🇷 Süper Lig | 🇧🇪 Jupiler Pro | 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Premiership | 🇬🇷 Super League | 🇨🇭 Super League | 🇦🇹 Bundesliga | 🇷🇺 Premier League | 🇺🇸 MLS | 🇰🇷 K League | 🇦🇺 A-League | 🇳🇴 Eliteserien | 🇸🇪 Allsvenskan | 🇩🇰 Superliga | 🇵🇱 Ekstraklasa | 🇭🇷 HNL
+
 ## 🚀 Inicio Rápido
 
 ```bash
@@ -76,21 +86,13 @@ for i, p in enumerate(sorted(preds, key=lambda x: -x['conf'])[:10], 1):
 "
 ```
 
-## 🤖 Modelo
-
-- **Algoritmo**: Random Forest
-- **Features**: 156 (forma, clasificación, H2H)
-- **Entrenado con**: 5 grandes ligas (7,234 partidos de 2023-2024)
-- **Target**: 1 = Local gana, 0 = Visitante gana
-- **Empates**: Excluidos
-
 ## 📁 Estructura
 
 ```
 AnalizadorFutbol/
 ├── backend/
 │   ├── models/trained/main_model.pkl  # Modelo entrenado
-│   ├── data/training_data.csv         # Datos de entrenamiento
+│   ├── data/training_data_30leagues.csv # Datos 29 ligas
 │   ├── src/
 │   │   ├── api/                       # FastAPI
 │   │   ├── data/features/             # Feature engineering
@@ -105,9 +107,9 @@ AnalizadorFutbol/
 Ver **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)** para documentación completa con:
 - Scripts de predicción detallados
 - Sincronización de datos
-- Lista completa de features
+- Lista completa de 29 ligas
 - Notas de validación
 
 ---
 
-*Desarrollado con 🤖 ML + ⚽ Fútbol*
+*Desarrollado con 🤖 ML + ⚽ 29 Ligas*

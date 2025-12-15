@@ -37,20 +37,45 @@ backend/models/trained/main_model.pkl
 | **Precisión general** | 75.2% |
 | **Precisión ≥70% confianza** | ~94% |
 
-### Ligas de Entrenamiento (5 Grandes Europeas)
+### Ligas de Entrenamiento (29 ligas de 19 países)
+
 | ID | Liga | País | Partidos |
 |----|------|------|----------|
-| 39 | Premier League | Inglaterra | 1,585 |
-| 140 | La Liga | España | 1,501 |
-| 135 | Serie A | Italia | 1,486 |
-| 61 | Ligue 1 | Francia | 1,426 |
-| 78 | Bundesliga | Alemania | 1,236 |
-| | **TOTAL** | | **7,234** |
+| 39 | Premier League | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England | 585 |
+| 40 | Championship | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England | 826 |
+| 61 | Ligue 1 | 🇫🇷 France | 469 |
+| 62 | Ligue 2 | 🇫🇷 France | 507 |
+| 71 | Serie A | 🇧🇷 Brazil | 561 |
+| 78 | Bundesliga | 🇩🇪 Germany | 453 |
+| 79 | 2. Bundesliga | 🇩🇪 Germany | 455 |
+| 88 | Eredivisie | 🇳🇱 Netherlands | 463 |
+| 94 | Primeira Liga | 🇵🇹 Portugal | 458 |
+| 103 | Eliteserien | 🇳🇴 Norway | 378 |
+| 106 | Ekstraklasa | 🇵🇱 Poland | 442 |
+| 113 | Allsvenskan | 🇸🇪 Sweden | 381 |
+| 119 | Superliga | 🇩🇰 Denmark | 283 |
+| 128 | Liga Profesional | 🇦🇷 Argentina | 508 |
+| 135 | Serie A | 🇮🇹 Italy | 540 |
+| 136 | Serie B | 🇮🇹 Italy | 523 |
+| 140 | La Liga | 🇪🇸 Spain | 556 |
+| 141 | Segunda División | 🇪🇸 Spain | 662 |
+| 144 | Jupiler Pro League | 🇧🇪 Belgium | 455 |
+| 179 | Premiership | 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland | 347 |
+| 188 | A-League | 🇦🇺 Australia | 255 |
+| 197 | Super League 1 | 🇬🇷 Greece | 362 |
+| 203 | Süper Lig | 🇹🇷 Turkey | 542 |
+| 207 | Super League | 🇨🇭 Switzerland | 340 |
+| 210 | HNL | 🇭🇷 Croatia | 264 |
+| 218 | Bundesliga | 🇦🇹 Austria | 281 |
+| 235 | Premier League | 🇷🇺 Russia | 349 |
+| 253 | Major League Soccer | 🇺🇸 USA | 762 |
+| 292 | K League 1 | 🇰🇷 South Korea | 328 |
+| | **TOTAL** | **19 países** | **13,335 partidos** |
 
 ### Datos de Entrenamiento
 ```
-backend/data/training_data.csv       # Datos raw
-backend/data/training_data_clean.csv # Datos limpios (imputados)
+backend/data/training_data_30leagues.csv       # Datos con 29 ligas
+backend/data/training_data_30leagues_clean.csv # Datos limpios (imputados)
 ```
 
 ---
@@ -183,8 +208,8 @@ python -c "
 from src.data.fixture_collector import FixtureCollector
 collector = FixtureCollector()
 
-# 5 grandes ligas
-ligas = [39, 140, 78, 135, 61]
+# Las 29 ligas del modelo
+ligas = [39, 40, 61, 62, 71, 78, 79, 88, 94, 103, 106, 113, 119, 128, 135, 136, 140, 141, 144, 179, 188, 197, 203, 207, 210, 218, 235, 253, 292]
 
 for liga_id in ligas:
     print(f'Sincronizando liga {liga_id}...')
@@ -200,7 +225,7 @@ python -c "
 from src.data.standings_collector import StandingsCollector
 collector = StandingsCollector()
 
-ligas = [39, 140, 78, 135, 61]
+ligas = [39, 40, 61, 62, 71, 78, 79, 88, 94, 103, 106, 113, 119, 128, 135, 136, 140, 141, 144, 179, 188, 197, 203, 207, 210, 218, 235, 253, 292]
 for liga_id in ligas:
     collector.sync_league_standings(liga_id, 2025)
 print('✅ Standings actualizados')
@@ -255,7 +280,7 @@ AnalizadorFutbol/
 1. **El modelo NO predice empates** - Solo victoria local (1) o visitante (0)
 2. **Confianza ≥70% es el umbral recomendado** - Precisión histórica ~94%
 3. **Los datos deben sincronizarse** antes de predecir para tener forma actual
-4. **Las 29 ligas en BD son para predicción**, pero el modelo solo fue entrenado con las 5 grandes
+4. **29 ligas de 19 países** - Cobertura global para predicciones
 
 ---
 
