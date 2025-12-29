@@ -94,14 +94,20 @@ class H2HCalculator:
         features = {}
         
         if not fixtures:
-            # Sin historial H2H
+            # Sin historial H2H - generar TODAS las features con valores por defecto
             features["h2h_total_matches"] = 0.0
             features["h2h_home_wins"] = 0.0
             features["h2h_away_wins"] = 0.0
             features["h2h_draws"] = 0.0
-            features["h2h_home_win_rate"] = 0.5
+            features["h2h_home_win_rate"] = 0.5  # Neutral cuando no hay datos
+            features["h2h_away_win_rate"] = 0.5
+            features["h2h_draw_rate"] = 0.0
             features["h2h_home_goals_avg"] = 0.0
             features["h2h_away_goals_avg"] = 0.0
+            features["h2h_total_goals_avg"] = 0.0
+            features["h2h_dominance"] = 0.0  # Neutral
+            features["h2h_recent_home_wins"] = 0.0
+            features["h2h_recent_home_rate"] = 0.5  # Neutral
             return features
         
         n = len(fixtures)

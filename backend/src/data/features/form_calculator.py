@@ -45,34 +45,41 @@ class FormCalculator:
         Returns:
             Lista de diccionarios con datos de fixtures
         """
+        from sqlalchemy import or_
+        
         with get_db_session() as db:
-            repo = FixtureRepository(db)
+            # Query directa con filtros de fecha y estado en SQL
+            query = db.query(Fixture).filter(
+                Fixture.date < before_date,
+                Fixture.status == "FT"
+            )
             
-            # Obtener más partidos y filtrar
-            fixtures = repo.get_team_fixtures(team_id, limit=limit * 2)
+            # Filtrar por equipo (local, visitante o ambos)
+            if home_only:
+                query = query.filter(Fixture.home_team_id == team_id)
+            elif away_only:
+                query = query.filter(Fixture.away_team_id == team_id)
+            else:
+                query = query.filter(
+                    or_(
+                        Fixture.home_team_id == team_id,
+                        Fixture.away_team_id == team_id
+                    )
+                )
             
-            # Filtrar por fecha y estado y convertir a diccionarios
-            filtered = []
-            for f in fixtures:
-                if f.date < before_date and f.status == "FT":
-                    if home_only and f.home_team_id != team_id:
-                        continue
-                    if away_only and f.away_team_id != team_id:
-                        continue
-                    # Copiar datos a diccionario
-                    filtered.append({
-                        'id': f.id,
-                        'home_team_id': f.home_team_id,
-                        'away_team_id': f.away_team_id,
-                        'home_goals': f.home_goals,
-                        'away_goals': f.away_goals,
-                        'date': f.date,
-                        'status': f.status,
-                    })
-                    if len(filtered) >= limit:
-                        break
+            # Ordenar por fecha descendente y limitar
+            fixtures = query.order_by(Fixture.date.desc()).limit(limit).all()
             
-            return filtered
+            # Convertir a diccionarios
+            return [{
+                'id': f.id,
+                'home_team_id': f.home_team_id,
+                'away_team_id': f.away_team_id,
+                'home_goals': f.home_goals,
+                'away_goals': f.away_goals,
+                'date': f.date,
+                'status': f.status,
+            } for f in fixtures]
     
     def _calculate_points(
         self,
@@ -319,37 +326,22 @@ class FormCalculator:
         """
         prefix = "home_" if is_home else "away_"
         
-        with get_db_session() as db:
-            repo = FixtureRepository(db)
-            fixtures = repo.get_team_fixtures(team_id, limit=20)
-            
-            # Filtrar por home/away y convertir a diccionarios
-            filtered = []
-            for f in fixtures:
-                if f.date < before_date and f.status == "FT":
-                    if is_home and f.home_team_id == team_id:
-                        filtered.append({
-                            'home_team_id': f.home_team_id,
-                            'away_team_id': f.away_team_id,
-                            'home_goals': f.home_goals,
-                            'away_goals': f.away_goals,
-                        })
-                    elif not is_home and f.away_team_id == team_id:
-                        filtered.append({
-                            'home_team_id': f.home_team_id,
-                            'away_team_id': f.away_team_id,
-                            'home_goals': f.home_goals,
-                            'away_goals': f.away_goals,
-                        })
-                    if len(filtered) >= 5:
-                        break
+        # Usar _get_recent_fixtures que ya filtra por fecha correctamente
+        filtered = self._get_recent_fixtures(
+            team_id=team_id,
+            before_date=before_date,
+            limit=5,
+            home_only=is_home,
+            away_only=not is_home
+        )
         
         features = {}
         n = len(filtered)
         
         if n == 0:
             features[f"{prefix}form_points_5"] = 0.0
-            features[f"{prefix}form_goals_avg"] = 0.0
+            features[f"{prefix}form_goals_for_avg"] = 0.0
+            features[f"{prefix}form_goals_against_avg"] = 0.0
             return features
         
         points = self._calculate_points(filtered, team_id)
